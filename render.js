@@ -27,7 +27,7 @@ exports.render = function compile({ path, url, algorithm, safe_path, algorithm_l
     algorithm_list: algorithm_list ? algorithm_list : undefined,
     server_hostname: opts.hostname ? opts.hostname : require('os').hostname,
     url,
-    host:new URL(url).host,
+    host: url ? new URL(url).host : undefined,
     opts
   };
   const context = new vm.createContext(sandbox);
