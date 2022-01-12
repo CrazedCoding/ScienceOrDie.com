@@ -401,6 +401,12 @@ const url = express.urlencoded({ limit: opts.maxUpload, extended: true }) //Pars
 application.use(cors({
   origin: '*'
 }));
+
+if(ssl) {
+  application.all('*', ensureSecure);
+  require('http').createServer(application).listen(80)
+}
+
 application.use(session({ secret: '' + Math.random(new Date().getTime()), resave: false, saveUninitialized: false, cookie: { maxAge: opts.cookieLifeTime * 1E3 } }))
 application.use((req, res, next) => { try { json(req, res, next); } catch (e) { console.log('JSON Error!', e) } });
 application.use((req, res, next) => { try { url(req, res, next); } catch (e) { console.log('URL Error!', e) } });
@@ -433,4 +439,12 @@ wss.on('connection', (webSocket, req) => {
   wss_protocol(webSocket)
 });
 
-
+function ensureSecure(req, res, next){
+  if(req.secure){
+    // OK, continue
+    return next();
+  };
+  // handle port numbers if you need non defaults
+  // res.redirect('https://' + req.host + req.url); // express 3.x
+  res.redirect('https://' + req.hostname + req.url); // express 4.x
+}
