@@ -410,7 +410,7 @@ application.use(function (err, req, res, next) {
   res.status(500).send('Something broke! Your upload was probably too large. Try uploading something smaller.')
 })
 //  Server creation starts here
-const server = factory.createServer(opts, application);
+const server = factory.createServer(opts.ssl, application);
 server.listen(ssl ? 443 : 80, err => {
   if (err) {
     console.log('Well, this didn\'t work...');
