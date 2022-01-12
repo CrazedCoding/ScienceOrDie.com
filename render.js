@@ -1,6 +1,7 @@
 const fs = require('fs');
 const jsdom = require('jsdom');
 const jpeg = require('jpeg-js');
+const URL = require('url')
 // Regex containing the keys listed immediately above.
 var htmlEscaper = /[&<>"'\/]/g;
 
@@ -26,6 +27,7 @@ exports.render = function compile({ path, url, algorithm, safe_path, algorithm_l
     algorithm_list: algorithm_list ? algorithm_list : undefined,
     server_hostname: opts.hostname ? opts.hostname : require('os').hostname,
     url,
+    host:new URL(url).host,
     opts
   };
   const context = new vm.createContext(sandbox);
