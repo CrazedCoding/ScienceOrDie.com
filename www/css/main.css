@@ -394,7 +394,7 @@ a {
 #navbar {
     height: 41px;
     width: 100%;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid #0f0;
     text-align: center;
     overflow: auto;
     background: linear-gradient(#000, #000)
