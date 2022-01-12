@@ -211,7 +211,6 @@ router.get('/live/:algorithm/:resource', (req, res, next) => {
     next()
   }
 });
-router.use('/test.html', express.static('www/test.html'))
 router.use('/js', express.static('www/js'))
 router.use('/img', express.static('www/img'))
 
@@ -277,7 +276,7 @@ router.get('/latest/:sort/:page', (req, res, next) => {
 router.all('/warning', (req, res, next) => {
   try {
     if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
-    res.write(render({path:'./www/warning.html', url:req.originalUrl, opts}))
+    res.write(render({path:'./www/warning.html', url:req.getUrl(), opts}))
     res.end()
   } catch (e) {
     console.log(e)
@@ -375,6 +374,13 @@ if(ssl) {
   application.all('*', ensureSecure);
   require('http').createServer(application).listen(80)
 }
+
+application.use(function(req, res, next) {
+  req.getUrl = function() {
+    return req.protocol + "://" + req.get('host') + req.originalUrl;
+  }
+  return next();
+});
 
 application.use(session({ secret: '' + Math.random(new Date().getTime()), resave: false, saveUninitialized: false, cookie: { maxAge: opts.cookieLifeTime * 1E3 } }))
 application.use((req, res, next) => { try { json(req, res, next); } catch (e) { console.log('JSON Error!', e) } });
