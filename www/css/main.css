@@ -302,7 +302,7 @@ textarea {
       z-index: 1;
       top: 48px;
       overflow-x: hidden;
-      background: linear-gradient(#000, #337)
+      background: linear-gradient(#000, #000)
     }
     
     /* Control the left side */
@@ -333,14 +333,14 @@ textarea {
     .split-a {
       top: 48px;
       height: calc(50% - 48px);
-      background: linear-gradient(#000, #337)
+      background: linear-gradient(#000, #000)
     }
     
     /* Control the right side */
     .split-b {
     border-top: 1px solid gray;
       bottom: 0;
-      background: linear-gradient(#000, #337)
+      background: linear-gradient(#000, #000)
     }
 }
 .split-a {
@@ -397,7 +397,7 @@ a {
     border-bottom: 1px solid #000;
     text-align: center;
     overflow: auto;
-    background: linear-gradient(#000, #337)
+    background: linear-gradient(#000, #000)
 }
 #navbar > * {
     max-height: 48px;
@@ -408,7 +408,8 @@ a {
     overflow: hidden;
     text-overflow: ellipsis;
     border: 1px solid #afa; 
-    width: 256px;
+    max-width: 256px;
+    height: auto;
     margin: auto;
 }
 .card>img {
