@@ -237,6 +237,29 @@ router.get('/captcha.png', function (req, res, next) {
     next()
   }
 });
+router.get('/thumbnail/:algorithm', function (req, res, next) {
+  try {
+    if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
+    const captcha = render_captcha()
+    const image = captcha.image
+    req.session.captcha_answer = captcha.answer+""
+    let safe_name = req.params.algorithm.toLowerCase().replace(/[\W_]+/g, "_");
+    safe_name = safe_name.substring(0, Math.min(32, safe_name.length))
+    const safe_path = safe_name + '/'
+    const files = fs.readdirSync('./www/share/' + safe_path)
+    const json_file = files.filter((file) => {
+      return file.endsWith('.json')
+    })
+    const file_path = './www/share/' + safe_path + json_file;
+    const algorithm = JSON.parse(fs.readFileSync(file_path))
+    if (!algorithm) next()
+    res.type('image/png')
+    res.send(algorithm.thumbnail);
+  } catch (e) {
+    console.log(e)
+    next()
+  }
+});
 
 router.get('/', (req, res, next) => {
   try {
@@ -334,8 +357,7 @@ router.post('/share/:hash', (req, res, next) => {
 
       let safe_name = req.body.name.toLowerCase().replace(/[\W_]+/g, "_");//Make name lower-case and replace non-alphanumeric with underscores
       safe_name = safe_name.substring(0, Math.min(32, safe_name.length))
-      const temp_name = req.body.public ? safe_name : ("" + Math.floor(Math.random(new Date().getTime()) * 1E12))
-      let folder_name = 'www/share/' + temp_name;
+      let folder_name = 'www/share/' + safe_nametemp_name;
 
       if (fs.existsSync(folder_name)) {
         res.status(404).send("Upload already exists.")
