@@ -22,6 +22,32 @@ user-scalable=no">
         document.body.innerHTML += '<script> window.onload=()=>{window.userAlgorithm = window.algorithm; reload_algorithm()}<\/script>'
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        function escapeHTML(string) {
+            var pre = document.createElement('pre');
+            var text = document.createTextNode(string);
+            pre.appendChild(text);
+            return pre.innerHTML;
+        }
+        // List of HTML entities for escaping.
+        var htmlEscapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            '/': '&#x2F;'
+        };
+
+        // Regex containing the keys listed immediately above.
+        var htmlEscaper = /[&<>"'\/]/g;
+
+        // Escape a string for HTML interpolation.
+        function escapeTitle(string) {
+            return ('' + string).replace(htmlEscaper, function (match) {
+                return htmlEscapes[match];
+            });
+        };
+
         const OG = `<meta name="description" content="`+server_hostname+`">
         <!-- Facebook Meta Tags -->
         <meta property="og:url" content="`+url+`">
