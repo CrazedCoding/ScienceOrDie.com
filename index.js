@@ -277,7 +277,7 @@ router.get('/latest/:sort/:page', (req, res, next) => {
 router.all('/warning', (req, res, next) => {
   try {
     if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
-    res.write(render({path:'./www/warning.html', opts}))
+    res.write(render({path:'./www/warning.html', url:req.url, opts}))
     res.end()
   } catch (e) {
     console.log(e)
