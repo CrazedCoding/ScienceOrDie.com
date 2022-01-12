@@ -87,7 +87,6 @@ function streamBufferChunked(buffer, req, res) {
   }
   range = { start: range[0], end: range[1] };
 
-  let stream = bufferToStream(buffer.subarray(range.start, range.end + 1), range);
   res.writeHead(206, {
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
@@ -95,7 +94,7 @@ function streamBufferChunked(buffer, req, res) {
     'Accept-Ranges': 'bytes',
     'Content-Range': 'bytes ' + range.start + '-' + range.end + '/' + buffer.length,
     'Content-Length': range.end - range.start + 1,
-  }).write(buffer.subarray(range.start, range.end + 1)).close();
+  }).write(buffer.subarray(range.start, range.end + 1));
 }
 
 function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
