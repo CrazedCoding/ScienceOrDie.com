@@ -21,6 +21,24 @@ user-scalable=no">
         document.body.innerHTML += '<script> window.algorithm=JSON.parse(atob(\"' + Buffer.from(JSON.stringify(algorithm), 'utf-8').toString('base64').split('').map((c, i)=>{return c+((i+1)%100==0?'\"+\n\"':'')}).reduce((acc, s)=>acc+s, "") + "\"));<\/script>"
         document.body.innerHTML += '<script> window.onload=()=>{window.userAlgorithm = window.algorithm; reload_algorithm()}<\/script>'
     </script>
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        const OG = `<meta name="description" content="`+server_hostname+`">
+        <!-- Facebook Meta Tags -->
+        <meta property="og:url" content="`+url+`">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
+        <meta property="og:description" content="`+escapeHTML(algorithm.description)+`">
+        <meta property="og:image" content="`+escapeHTML(algorithm.thumbnail)+`">
+
+        <!-- Twitter Meta Tags -->
+        <meta name="twitter:card" content="`+server_hostname+`">
+        <meta property="twitter:domain" content="`+host+`">
+        <meta property="twitter:url" content="`+url+`">
+        <meta name="twitter:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
+        <meta name="twitter:description" content="`+escapeHTML(algorithm.description)+`">
+        <meta name="twitter:image" content="`+escapeHTML(algorithm.thumbnail)+`">`
+        document.body.innerHTML += OG
+    </script>
     <script type="text/javascript" src="www/js/html2canvas.min.js"></script>
     <script type="text/javascript" src="www/js/format.js"></script>
     <script type="text/javascript" src="www/js/pipeline.js"></script>

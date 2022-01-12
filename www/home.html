@@ -127,17 +127,17 @@ user-scalable=no">
         <!-- Facebook Meta Tags -->
         <meta property="og:url" content="`+url+`">
         <meta property="og:type" content="website">
-        <meta property="og:title" content="`+'CAPTCHA'+`">
-        <meta property="og:description" content="`+'Are you human?'+`">
-        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">
+        <meta property="og:title" content="`+'Browse'+`">
+        <meta property="og:description" content="`+'Are you science?!'+`">
+        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">
 
         <!-- Twitter Meta Tags -->
         <meta name="twitter:card" content="`+server_hostname+`">
         <meta property="twitter:domain" content="`+host+`">
         <meta property="twitter:url" content="`+url+`">
-        <meta name="twitter:title" content="`+'CAPTCHA'+`">
-        <meta name="twitter:description" content="`+'Are you human?'+`">
-        <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">`
+        <meta name="twitter:title" content="`+'Browse'+`">
+        <meta name="twitter:description" content="`+'Are you science?!'+`">
+        <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">`
         document.body.innerHTML += OG
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
@@ -165,7 +165,7 @@ user-scalable=no">
                         }
                     }
                 }
-            } 
+            }
         } catch(e) {
             page = 1;
             sort = 'date'
@@ -242,7 +242,7 @@ user-scalable=no">
 
         // document.body.innerHTML += '<script> window.algorithm=' + JSON.stringify(algorithm) + "; compile_algorithm(window.algorithm)<\/script>"
 
-        const index = Math.floor(Math.random()*(algorithm_list.length-1))
+        const index = 0;//Math.floor(Math.random()*(algorithm_list.length-1))
 
         var iframe = "<iframe onload='window.hidePopover();' allow='microphone; camera' src='/live/"+algorithm_list[index].path+"/' id='preview'></iframe>"
         preview.innerHTML += iframe

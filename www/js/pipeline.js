@@ -913,7 +913,7 @@ OpenGLStage.prototype.refreshGeometry = function (context, program) {
     this.index_buffer.numItems = this.indices.length;
   }
 }
-var thumbnailDim = 256;
+var thumbnailDim = 1024;
 var updateAlgorithmThumbnailAndSave = false;
 var reloadTextures = false;
 
