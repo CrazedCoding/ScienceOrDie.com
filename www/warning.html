@@ -98,6 +98,7 @@ user-scalable=no">
                 <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+server_hostname+"/img/icon.png"+`">`
             } 
         } catch(e) {
+            console.log(e)
         }
 
         document.body.innerHTML += `<div style='display:none;' id='popovers-div'></div>`
