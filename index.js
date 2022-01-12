@@ -62,19 +62,6 @@ function fetchPublic() {
   return algorithms
 }
 
-const { Readable } = require('stream');
-
-class BufferStream extends Readable {
-  constructor(buffer, opts) {
-    super(opts);
-    this.buffer = buffer;
-  }
-}
-
-function bufferToStream(buffer, opts = {}) {
-  return new BufferStream(buffer, opts);
-}
-
 // Streaming chunk
 function streamBufferChunked(buffer, req, res) {
   let chunkSize = buffer.length;
@@ -252,9 +239,9 @@ router.get('/thumbnail/:algorithm', function (req, res, next) {
     })
     const file_path = './www/share/' + safe_path + json_file;
     const algorithm = JSON.parse(fs.readFileSync(file_path))
-    if (!algorithm) next()
     res.type('image/png')
     res.send(algorithm.thumbnail);
+    if (!algorithm) next()
   } catch (e) {
     console.log(e)
     next()
