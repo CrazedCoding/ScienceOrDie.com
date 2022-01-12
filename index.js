@@ -69,11 +69,6 @@ class BufferStream extends Readable {
     super(opts);
     this.buffer = buffer;
   }
-
-  _read() {
-    this.push(this.buffer);
-    this.push(null);
-  }
 }
 
 function bufferToStream(buffer, opts = {}) {
