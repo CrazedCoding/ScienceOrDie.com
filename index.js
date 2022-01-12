@@ -239,9 +239,9 @@ router.get('/thumbnail/:algorithm', function (req, res, next) {
     })
     const file_path = './www/share/' + safe_path + json_file;
     const algorithm = JSON.parse(fs.readFileSync(file_path))
-    res.type('image/png')
-    res.send(algorithm.thumbnail);
     if (!algorithm) next()
+    res.type('image/png')
+    res.send(algorithm.thumbnail).end();
   } catch (e) {
     console.log(e)
     next()
