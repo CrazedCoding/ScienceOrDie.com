@@ -119,7 +119,7 @@ router.all('/edit/:algorithm/', (req, res, next) => {
       res.end()
     }
     else {
-      res.write(render({path:'./www/edit.html', algorithm, safe_path, opts}))
+      res.write(render({path:'./www/edit.html', algorithm, url:req.getUrl(), safe_path, opts}))
       res.end()
     }
   } catch (e) {
@@ -169,7 +169,7 @@ router.get('/live/:algorithm/', (req, res, next) => {
       algorithm.views += 1;
       fs.writeFileSync(relative_path, JSON.stringify(algorithm, null, 2))
       // algorithm.files = algorithm.files.map((file)=>{file.data = ''; return file})
-      res.write(render({path:'./www/live.html', algorithm, safe_path, opts}))
+      res.write(render({path:'./www/live.html', algorithm, url:req.getUrl(), safe_path, opts}))
       res.end()
     }
   } catch (e) {
