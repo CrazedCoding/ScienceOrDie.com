@@ -408,7 +408,7 @@ a {
     overflow: hidden;
     text-overflow: ellipsis;
     border: 1px solid #afa; 
-    width: 410px;
+    width: 256px;
     margin: auto;
 }
 .card>img {
