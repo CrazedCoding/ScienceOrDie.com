@@ -86,13 +86,14 @@ function streamBufferChunked(buffer, req, res) {
     range[1] = buffer.length - 1;
   }
   range = { start: range[0], end: range[1] };
+  res.status(206)
   res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
   res.setHeader('Pragma', 'no-cache')
   res.setHeader('Expires', 0)
   res.setHeader('Accept-Ranges', 'bytes')
   res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
   res.setHeader('Content-Length', range.end - range.start + 1)
-  res.write(buffer.subarray(range.start, range.end + 1));
+  res.write(buffer.subarray(range.start, range.end + 1)).end();
 }
 
 function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
