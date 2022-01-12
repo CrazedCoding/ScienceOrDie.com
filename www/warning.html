@@ -95,6 +95,7 @@ user-scalable=no">
             <meta name="twitter:title" content="`+CAPTCHA+`">
             <meta name="twitter:description" content="`+'Are you human?'+`">
             <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+server_hostname+"/img/icon.png"+`">`
+            console.log(OG);
             document.body.innerHTML += OG
         } catch(e) {
             console.log(e)
