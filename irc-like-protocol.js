@@ -63,7 +63,7 @@ exports.create = function () {
 
 		const regex = /[A-z0-9][A-z0-9]*/;
 		const found = name.match(regex);
-		if (found && found.length > 0 && found[0].length == name.length) {
+		if (!found || !found.length && found[0].length != name.length) {
 			this.client.send(JSON.stringify({ error: 'Invalid channel name. Please use the following regular expression:\n'+regex}));
 			return;
 		}
