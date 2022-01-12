@@ -241,7 +241,7 @@ router.get('/thumbnail/:algorithm', function (req, res, next) {
     const algorithm = JSON.parse(fs.readFileSync(file_path))
     if (!algorithm) next()
     res.type('image/png')
-    streamBufferChunked(algorithm.thumbnail, req, res)
+    streamBufferChunked(Buffer.from(algorithm.thumbnail, 'utf-8');, req, res)
   } catch (e) {
     console.log(e)
     next()
