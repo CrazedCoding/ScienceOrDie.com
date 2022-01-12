@@ -5,7 +5,7 @@ user-scalable=no">
 
 <head>
     <style type="text/css" src="www/css/main.css"></style>
-    <script class='self_rendering_code'  type="text/javascript">
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
         const OG = `<meta name="description" content="`+server_hostname+`">
         <!-- Facebook Meta Tags -->
         <meta property="og:url" content="`+url+`">
@@ -21,9 +21,9 @@ user-scalable=no">
         <meta name="twitter:title" content="`+'CAPTCHA'+`">
         <meta name="twitter:description" content="`+'Are you human?'+`">
         <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">`
-        console.log("OG", OG);
         document.body.innerHTML += OG
-
+    </script>
+    <script class='self_rendering_code'  type="text/javascript">
         window.counter = 0;
 
         function escapeHTML(string) {
