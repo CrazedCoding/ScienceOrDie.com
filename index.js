@@ -62,29 +62,6 @@ function fetchPublic() {
   return algorithms
 }
 
-// Readable Streams Storage Class
-class FileReadStreams {
-  constructor() {
-    this._streams = {};
-  }
-
-  make(file, options = null) {
-    return options ?
-      fs.createReadStream(file, options)
-      : fs.createReadStream(file);
-  }
-
-  get(file) {
-    return this._streams[file] || this.set(file);
-  }
-
-  set(file) {
-    return this._streams[file] = this.make(file);
-  }
-}
-const readStreams = new FileReadStreams();
-
-
 const { Readable } = require('stream');
 
 class BufferStream extends Readable {
@@ -124,7 +101,7 @@ function streamBufferChunked(buffer, req, res) {
     'Content-Range': 'bytes ' + range.start + '-' + range.end + '/' + buffer.length,
     'Content-Length': range.end - range.start + 1,
   });
-  stream.pipe(res);
+  stream.pipe(res).close();
 }
 
 function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
