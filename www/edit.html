@@ -243,13 +243,16 @@ user-scalable=no">
 
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        var safe_name = algorithm.name.toLowerCase().replace(/[\W_]+/g, "_");//Make name lower-case and replace non-alphanumeric with underscores
+        safe_name = safe_name.substring(0, Math.min(32, safe_name.length))
+
         const OG = `<meta name="description" content="`+server_hostname+`">
         <!-- Facebook Meta Tags -->
         <meta property="og:url" content="`+url+`">
         <meta property="og:type" content="website">
         <meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
         <meta property="og:description" content="`+escapeHTML(algorithm.description)+`">
-        <meta property="og:image" content="`+escapeHTML(algorithm.thumbnail)+`">
+        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">
 
         <!-- Twitter Meta Tags -->
         <meta name="twitter:card" content="`+server_hostname+`">
@@ -257,7 +260,7 @@ user-scalable=no">
         <meta property="twitter:url" content="`+url+`">
         <meta name="twitter:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
         <meta name="twitter:description" content="`+escapeHTML(algorithm.description)+`">
-        <meta name="twitter:image" content="`+escapeHTML(algorithm.thumbnail)+`">`
+        <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">`
         document.body.innerHTML += OG
     </script>
     <script type="text/javascript" src="/js/format.js"></script>
