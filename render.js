@@ -1,7 +1,7 @@
 const fs = require('fs');
 const jsdom = require('jsdom');
 const jpeg = require('jpeg-js');
-const URL = require('url')
+const { URL } = require('url')
 // Regex containing the keys listed immediately above.
 var htmlEscaper = /[&<>"'\/]/g;
 
