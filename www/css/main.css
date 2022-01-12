@@ -414,6 +414,7 @@ a {
 }
 .card>img {
     border: 1px solid #DDD; 
+    max-height: 256px;
 }
 .card>img:hover {
     border: 1px solid #0F0; 
