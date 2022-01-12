@@ -240,8 +240,13 @@ router.get('/thumbnail/:algorithm', function (req, res, next) {
     const file_path = './www/share/' + safe_path + json_file;
     const algorithm = JSON.parse(fs.readFileSync(file_path))
     if (!algorithm) next()
-    res.type('image/png')
-    streamBufferChunked(Buffer.from(algorithm.thumbnail, 'utf-8'), req, res)
+    const im = algorithm.thumbnail.split(",")[1];
+    const img = Buffer.from(im, 'base64');
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': img.length
+    });
+    res.end(img); 
   } catch (e) {
     console.log(e)
     next()
