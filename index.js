@@ -241,7 +241,7 @@ router.get('/captcha.png', function (req, res, next) {
 router.get('/', (req, res, next) => {
   try {
     if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
-    res.write(render({path:'./www/home.html', algorithm_list:fetchFeatured(), url:req.url, opts}))
+    res.write(render({path:'./www/home.html', algorithm_list:fetchFeatured(), url:req.getUrl(), opts}))
     res.end()
   } catch (e) {
     console.log(e)
@@ -251,7 +251,7 @@ router.get('/', (req, res, next) => {
 router.get('/featured/:sort/:page', (req, res, next) => {
   try {
     if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
-    res.write(render({path:'./www/home.html', algorithm_list:fetchFeatured(), url:req.url, opts}))
+    res.write(render({path:'./www/home.html', algorithm_list:fetchFeatured(), url:req.getUrl(), opts}))
     res.end()
   } catch (e) {
     console.log(e)
@@ -265,7 +265,7 @@ router.get('/latest/:sort/:page', (req, res, next) => {
       res.end()
     }
     else {
-      res.write(render({path:'./www/home.html', algorithm_list:fetchPublic(), url:req.url, opts}))
+      res.write(render({path:'./www/home.html', algorithm_list:fetchPublic(), url:req.getUrl(), opts}))
       res.end()
     }
   } catch (e) {
