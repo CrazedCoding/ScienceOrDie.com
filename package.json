@@ -1,0 +1,20 @@
+{
+  "name": "ScienceOrDie.com",
+  "version": "1.0.0",
+  "description": "Generic media/code server.",
+  "main": "index.js",
+  "scripts": {
+    "configure": "node configure.js",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "jpeg-js": "^0.4.3",
+    "jsdom": "^18.1.0",
+    "ws": "^8.2.3"
+  }
+}

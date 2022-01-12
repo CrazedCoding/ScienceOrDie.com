@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, 
+user-scalable=no">
+<html>
+
+<head>
+    <style type="text/css" src="www/css/main.css"></style>
+    <script type="text/javascript" src="/js/html2canvas.min.js"></script>
+    <script class='self_rendering_code'>
+        function show_waiting() {
+            showPopover('<h1>Working...</h1>', true, [])
+        }
+
+        function share_algorithm() {
+            let path = window.location.pathname
+            path = path.substring(0, path.length - 1)
+            path = path.substring(path.lastIndexOf('/') + 1, path.length) + '/'
+            showPopover(
+                '<h1 style="display:inline-block;">' + 'Editing Link:</h1>' +
+                '<a style="color:#0f0; text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/edit/" + path) + '>' + (window.location.origin + "/edit/" + path) + '</a>' +
+                '<button style="color:#fff; display:inline-block;"onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/edit/" + path + '\')">Copy</button>' +
+                '<br><br><h1 style="display:inline-block;">' + 'Viewing Link:</h1>' +
+                '<a style="color:#0f0; text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/live/" + path) + '>' + (window.location.origin + "/live/" + path) + '</a>' +
+                '<button style="color:#fff; display:inline-block;" onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/live/" + path + '\')">Copy</button><br>', false, ['<h1>Done</h1>'])
+        }
+
+        function sendAlgorithm(answer) {
+            var url = "/share/" + answer;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", url);
+
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function (event) {
+                console.log(xhr)
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        hidePopover();
+                        const response = JSON.parse(xhr.responseText)
+                        if (response.error) {
+                            showPopover('<h1 style="text-decoration:underline;">FAILED</h1><br>' +
+                                '<h1>' + escapeHTML(response.error) + '</h1>')
+                            return
+                        }
+                        const path = response.saved_as
+                        window.location.href = '/edit/' + path + "?upload=1"
+                    }
+                    else {
+                        showPopover('<h1>Failed to save!</h1>' + (xhr.responseText ? '<h1>' + escapeTitle(xhr.responseText) + '</h1>' : ""), false, ['<h1>Cancel</h1>', '<h1>Retry<h1>'], ['hidePopover()', 'hidePopover();hidePopover(); upload_algorithm()'])
+                    }
+                }
+            }
+            xhr.onerror = function () {
+            };
+
+            xhr.send(JSON.stringify(window.lastSavedAlgorithm));
+        }
+
+        function upload_algorithm() {
+            window.showPopover(`<h1 style="text-decoration:underline;">WARNING</h1><br>
+            <h1 style='text-align:center; font-size:14px;'>By typing the alphanumeric characters in the image below, and clicking "Upload", you accept all the risks associated with accepting a HTTP cookie, in addition to any risks of using our site.</h1>
+            <div style='display:inline-flex; text-align:center !important;'>
+            <img id='captcha' style="" src='/captcha.png?t=`+ (window.counter++) + `'>
+            <button style="color:#fff; border-color:#0ff;" onclick='document.getElementById("captcha").src="/captcha.png?t="+window.counter++'>Refresh</button>
+            </div>
+            <div style='text-align:center;'><input id='captcha_answer' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' style='text-align:center; width:66.6%; border:none !important;' placeholder="Alphanumeric characters..." value=''></input></div>`, true, 
+            [ "<h1 style='color:#fff;'>Cancel</h1>",
+              `<h1 style='color:#fff;'>Upload</h1>`], ['window.hidePopover();', 'sendAlgorithm(document.getElementById("captcha_answer").value); '])
+        }
+        function show_save_warning() {
+            showPopover(`<h1 style="text-decoration:underline;">WARNING</h1>
+            <h1 style='text-align:center; color:#f00;'>&nbsp;&nbsp;There is no way of deleting what you upload to the server!
+            </h1>`, false, ['<h1 style=\'color:#fff;\'>Cancel</h1>', '<h1 style=\'color:#fff;\'>Continue</h1>'], ['hidePopover();', 'hidePopover();upload_algorithm();'])
+
+        }
+
+        function shareReminder() {
+            showPopover(`<h1 style="text-decoration:underline;">REMINDER</h1>
+            <h1 style='text-align:center'>&nbsp;&nbsp;There is no way of deleting what you upload to the server.
+            </h1>`, true)
+        }
+
+        function escapeHTML(string) {
+            var pre = document.createElement('pre');
+            var text = document.createTextNode(string);
+            pre.appendChild(text);
+            return pre.innerHTML;
+        }
+        // List of HTML entities for escaping.
+        var htmlEscapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            '/': '&#x2F;'
+        };
+
+        // Regex containing the keys listed immediately above.
+        var htmlEscaper = /[&<>"'\/]/g;
+
+        // Escape a string for HTML interpolation.
+        function escapeTitle(string) {
+            return ('' + string).replace(htmlEscaper, function (match) {
+                return htmlEscapes[match];
+            });
+        };
+
+        const maxScroll = 5000;
+        function consoleAppend(args) {
+            const e = document.getElementById('console')
+            e.value = e.value + args.reduce((acc, a) => acc + JSON.stringify(a, null, 2) + "\n", "")
+            while (e.scrollHeight > maxScroll) e.value = e.value.slice(1, e.value.length)
+            e.scrollTop = e.scrollHeight;
+        }
+
+        function executeCommand() {
+            const e = document.getElementById('console')
+            const e2 = document.getElementById('command')
+            const command = e2.value
+            // e2.value = ""
+            e.value += command + '\n'
+            e.scrollTop = e.scrollHeight
+            document.getElementById('preview').contentWindow.postMessage({ execute: true, command: command }, '*');
+        }
+
+        window.addEventListener('message', function (e) {
+            // Get the sent data
+            const data = e.data;
+
+            // If you encode the message in JSON before sending them,
+            // then decode here
+            const decoded = JSON.parse(data);
+            // console.log(decoded)
+
+            if (decoded.save) {
+                window.lastSavedAlgorithm = decoded.algorithm;
+                window.hidePopover()
+                show_save_warning()
+            } else if (decoded.log || decoded.debug || decoded.warn || decoded.error) {
+                //consoleAppend(decoded.args)
+            }
+
+
+        });
+        function compile_algorithm(algorithm) {
+            document.getElementById('preview').contentWindow.postMessage({ compile: JSON.stringify(algorithm) }, '*');
+        }
+
+
+        function toggle(element, event) {
+            const innerDiv = event.target.parentElement.nextSibling
+            if (!innerDiv.classList.contains('inner-tab')) return;
+            if (innerDiv.classList.contains('tab-collapsed')) {
+                innerDiv.classList.remove('tab-collapsed')
+                element.classList.remove('expandable')
+            }
+            else {
+                innerDiv.classList.add('tab-collapsed')
+                element.classList.add('expandable')
+            }
+            event.preventDefault()
+            event.stopPropagation()
+        }
+
+        function redrawTabs() {
+            const tabs = document.getElementById('tabs')
+            const oldScroll = tabs.scrollHeight
+            tabs.innerHTML = ""
+            renderTabTree(getAlgorithmTabs(window.algorithm), tabs)
+            const lists = document.getElementsByClassName('list-tab')
+            for (const list of lists) list.setAttribute('onclick', 'toggle(this, event)')
+            tabs.scrollHeight = oldScroll
+        }
+        function deleteItem(list, index) {
+            list.splice(index, 1)
+            redrawTabs()
+        }
+        function moveItemUp(list, index) {
+            const item = list.splice(index, 1)
+            list.splice(Math.max(index - 1, 0), 0, item[0])
+            redrawTabs()
+        }
+        function moveItemDown(list, index) {
+            const item = list.splice(index, 1)
+            list.splice(Math.min(list.length, index + 1), 0, item[0])
+            redrawTabs()
+        }
+        function duplicateItem(list, index) {
+            const duplicate = JSON.parse(JSON.stringify(list[index]))
+            duplicate.name += '_duplicate'
+            list.splice(index, 0, duplicate)
+            redrawTabs()
+        }
+
+        function addFile(element, event) {
+            const fileInput = document.getElementById('file_input')
+            fileInput.onchange = (() => {
+                var reader = new FileReader();
+                reader.readAsBinaryString(fileInput.files[0]);
+                reader.onload = function () {
+                    const fileJSON = JSON.parse(JSON.stringify(Format.File));
+                    fileJSON.name = fileInput.files[0].name
+                    fileJSON.data = btoa(reader.result);
+                    window.algorithm.files.unshift(fileJSON)
+                    redrawTabs()
+                };
+                reader.onerror = function (error) {
+                    //consoleAppend(['Error: ', JSON.stringify(error)]);
+                };
+            })
+
+            fileInput.click()
+
+            event.preventDefault()
+            event.stopPropagation();
+        }
+        function addContext(element, event) {
+            window.algorithm.pipeline.contexts.unshift(JSON.parse(JSON.stringify(Format.OpenGLContext)))
+            event.preventDefault()
+            event.stopPropagation();
+            redrawTabs()
+        }
+        function addProgram(element, event) {
+            window.algorithm.pipeline.programs.unshift(JSON.parse(JSON.stringify(Format.OpenGLProgram)))
+            event.preventDefault()
+            event.stopPropagation();
+            redrawTabs()
+        }
+        function addUniform(program_index, element, event) {
+            window.algorithm.pipeline.programs[program_index].uniforms.unshift(JSON.parse(JSON.stringify(Format.OpenGLUniform)))
+            event.preventDefault()
+            event.stopPropagation();
+            redrawTabs()
+        }
+        function addStage(element, event) {
+            window.algorithm.pipeline.stages.unshift(JSON.parse(JSON.stringify(Format.OpenGLStage)))
+            event.preventDefault()
+            event.stopPropagation();
+            redrawTabs()
+        }
+
+    </script>
+    <script type="text/javascript" src="/js/format.js"></script>
+    <!--One for the client-->
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript" src="./www/js/format.js"></script>
+    <!--One for the server-->
+    <script class='self_rendering_code' type="text/javascript">
+        var Tab = function (node = "", children = null, listInfo = null) {
+            this.node = node;
+            this.children = children;
+            this.listInfo = listInfo
+        };
+        function renderTabTree(parent, html, previousParent, width = 0., itemNumber = -1) {
+
+            var innerTabDiv = document.createElement('div');//.css('width', 'calc(80%-'+Math.floor(width*4)+'px)');;
+            var outerTabDiv = document.createElement('div');//.css('width', 'calc(80%-'+Math.floor(width*4)+'px)');;
+
+            innerTabDiv.classList.add('inner-tab');
+            outerTabDiv.classList.add('outer-tab');
+            if (parent.listInfo)
+                outerTabDiv.classList.add('list-tab')
+            html.append(outerTabDiv)
+            // innerTabDiv.css("transform", 'translateX('+Math.floor(width) + "px)");
+            innerTabDiv.style.marginLeft = width + '%';
+            innerTabDiv.style.width = (100 - width) + '%'
+            outerTabDiv.style.marginLeft = width + '%';
+            outerTabDiv.style.width = (100 - width) + '%'
+            if (parent.node) {
+                var bar = document.createElement('div');
+                bar.style.width = '100%'
+                const marker = document.createElement('div');
+                marker.innerHTML += parent.node;
+                bar.append(marker)
+                if (parent.listInfo) {
+                    const add = document.createElement('h1');
+                    add.innerHTML += "+1"
+                    add.classList.add("add-button")
+                    bar.append(add)
+                    add.setAttribute('onclick', parent.listInfo.addFunction)
+                }
+
+                // bar.children().css('margin', '0px 0px 0px 0px')
+                outerTabDiv.append(bar)
+                if (previousParent && previousParent.body) {
+                    if (previousParent.listInfo) {
+                        const variable = previousParent.listInfo.listVariable;
+                        const del = "<h1 class='delete' onclick='deleteItem(" + variable + "," + itemNumber + ")'>X</h1>"
+                        const up = "<h1 class='move-up' onclick='moveItemUp(" + variable + "," + itemNumber + ")'>/\\</h1>"
+                        const down = "<h1 class='move-down' onclick='moveItemDown(" + variable + "," + itemNumber + ")'>\\/</h1>"
+                        const duplicate = "<h1 class='duplicate' onclick='duplicateItem(" + variable + "," + itemNumber + ")'>x2</h1>"
+                        const controlsDiv = "<div class='controls-tab'>" + duplicate + down + up + del + "</div>";
+                        bar.style.textAlign = 'left'
+                        marker.style.display = 'inline-block'
+                        marker.style.width = '40%'
+                        bar.innerHTML += controlsDiv;
+                    }
+                    previousParent.body.push(outerTabDiv)
+                }
+                if (parent.children) {
+                    bar.classList.add('tab')
+                    if (!parent.listInfo)
+                        marker.style.width = '100%'
+                    parent.body = []
+                    marker.style.display = 'inline-block'
+                    width += 1.25;
+                    parent.children.forEach((e, i) => {
+                        renderTabTree(parent.children[i], innerTabDiv, parent, width, i)
+                    });
+                }
+            }
+            if (parent.children && parent.children.length > 0)
+                html.append(innerTabDiv)
+        }
+        function getAlgorithmTabs(algorithm) {
+            var htmlTab = new Tab(
+                "<h1 class='tab'>HTML</h1>",
+                [
+                    new Tab(
+                        `<textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' onkeyup='window.algorithm.html=event.target.value' id="html" style="  border:1px 1px 1px 1px solid #fff;">`
+                        + escapeHTML(algorithm.html) +
+                        `</textarea>`
+                    )
+                ]
+            )
+            var javascriptTab = new Tab(
+                "<h1 class='tab'>JavaScript</h1>",
+                [
+                    new Tab(
+                        `<textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' onkeyup='window.algorithm.client=event.target.value' id="javascript" style="border:1px 1px 1px 1px solid #fff;">`
+                        + escapeHTML(algorithm.client) +
+                        `</textarea>`)
+                ]
+            )
+
+            var contextsTab = new Tab("<h1 class='tab'>HTMLCanvas Contexts</h1>", algorithm.pipeline.contexts.map((context, i) => {
+                const context_id = `context_` + i;
+                return new Tab(`
+      <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="`+ context_id + `_name"
+        style="width: 100%; display:inline-block; text-align:center;"
+        placeholder="Context name..."  onkeyup='window.algorithm.pipeline.contexts[`+ i + `].name=event.target.value' value='`
+                    + escapeTitle(context.name) + '\'></input><br>'
+                    , [
+                        new Tab(
+                            `<h1>Width</h1>
+      <label class="checkboxes">Screen Width
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_width" ` + (context.width.type === Format.OpenGLDimension.Type.SCREEN_SIZE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].width.type="` + Format.OpenGLDimension.Type.SCREEN_SIZE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Next Lowest Power of Two
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_width"` + (context.width.type === Format.OpenGLDimension.Type.NEXT_LOWEST_POWER_OF_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].width.type="` + Format.OpenGLDimension.Type.NEXT_LOWEST_POWER_OF_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Next Highest Power of Two
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_width"` + (context.width.type === Format.OpenGLDimension.Type.NEXT_HIGHEST_POWER_OF_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].width.type="` + Format.OpenGLDimension.Type.NEXT_HIGHEST_POWER_OF_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Exact JS Evaluation
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_width"` + (context.width.type === Format.OpenGLDimension.Type.EXACT ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].width.type="` + Format.OpenGLDimension.Type.EXACT + `"'>
+        <span class="checkmark"></span>
+        <textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' onkeyup='window.algorithm.pipeline.contexts[`+ i + `].width.value=event.target.value' placeholder="Return exact value with JavaScript, here...">`
+                            + escapeHTML(context.width.value) +
+                            `</textarea>
+      </label>`
+                        ),
+                        new Tab(
+                            `<h1>Height</h1>
+      <label class="checkboxes">Screen Height
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_height" ` + (context.height.type === Format.OpenGLDimension.Type.SCREEN_SIZE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].height.type="` + Format.OpenGLDimension.Type.SCREEN_SIZE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Next Lowest Power of Two
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_height"` + (context.height.type === Format.OpenGLDimension.Type.NEXT_LOWEST_POWER_OF_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].height.type="` + Format.OpenGLDimension.Type.NEXT_LOWEST_POWER_OF_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Next Highest Power of Two
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_height"` + (context.height.type === Format.OpenGLDimension.Type.NEXT_HIGHEST_POWER_OF_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].height.type="` + Format.OpenGLDimension.Type.NEXT_HIGHEST_POWER_OF_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes">Exact JS Evaluation
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ context_id + `_height"` + (context.height.type === Format.OpenGLDimension.Type.EXACT ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].height.type="` + Format.OpenGLDimension.Type.EXACT + `"'>
+        <span class="checkmark"></span>
+        <textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' onkeyup='window.algorithm.pipeline.contexts[`+ i + `].height.value=event.target.value' placeholder="Return exact value with JavaScript, here...">`
+                            + escapeHTML(context.height.value) +
+                            `</textarea>
+      </label>`
+                        ),
+                        new Tab(
+                            `<h1>Other</h1>
+      <label class="checkboxes">WebGL Depth Buffer Enabled
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="checkbox" name="`+ context_id + `_depth_test"
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].depth_test=event.target.checked'>
+        <span class="checkmark"></span>
+      </label>`
+                        )])
+            }), { listVariable: 'window.algorithm.pipeline.contexts', addFunction: 'addContext(this, event)' })
+
+            var programsTab = new Tab("<h1 class='tab'>WebGL GLSL Programs</h1>", algorithm.pipeline.programs.map((program, i) => {
+                const program_id = `program_` + i;
+                return new Tab(`
+      <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="`+ program_id + `_name"
+        style="width: 100%; display:inline-block; text-align:center;"
+        placeholder="Program name..."   onkeyup='window.algorithm.pipeline.programs[`+ i + `].name=event.target.value'value='`
+                    + escapeTitle(program.name) + '\'></input>'
+                    , [
+                        new Tab(
+                            `<h1>GLSL Uniform Variables</h1>`,
+                            program.uniforms.map((uniform, j) => {
+                                const uniform_id = program_id + `_uniform_` + j;
+                                return new Tab(`
+      <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="`+ uniform_id + `_name"
+        style="width: 100%; display:inline-block; text-align:center;"
+        placeholder="Uniform name..."   onkeyup='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].name=event.target.value' value='`
+                                    + escapeTitle(uniform.name) + '\'></input>'
+                                    , [
+                                        new Tab(
+                                            `<h1>Uniform Variable Type</h1>
+      <label class="checkboxes inline-checkboxes">float
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type" ` + (uniform.type === Format.OpenGLUniform.Type.FLOAT ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.FLOAT + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">integer
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.INT ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.INT + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">boolean
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.BOOL ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.BOOL + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">vec2
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.VEC_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.VEC_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">vec3
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.VEC_THREE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.VEC_THREE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">vec4
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.VEC_FOUR ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.VEC_FOUR + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+
+                                            `<label class="checkboxes inline-checkboxes">bvec2
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.BVEC_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.BVEC_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">bvec3
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.BVEC_THREE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.BVEC_THREE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">bvec4
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.BVEC_FOUR ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.BVEC_FOUR + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+
+                                            `<label class="checkboxes inline-checkboxes">ivec2
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.IVEC_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.IVEC_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">ivec3
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.IVEC_THREE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.IVEC_THREE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">ivec4
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.IVEC_FOUR ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.IVEC_FOUR + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+
+                                            `<label class="checkboxes inline-checkboxes">mat2
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.MAT_TWO ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.MAT_TWO + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">mat3
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.MAT_THREE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.MAT_THREE + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">mat4
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.MAT_FOUR ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.MAT_FOUR + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">Sampler2D
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.SAMPLER_TWO_D ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.SAMPLER_TWO_D + `"'>
+        <span class="checkmark"></span>
+      </label>`+
+                                            `<label class="checkboxes inline-checkboxes">SamplerCube
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ uniform_id + `_type"` + (uniform.type === Format.OpenGLUniform.Type.SAMPLERCUBE ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].type="` + Format.OpenGLUniform.Type.SAMPLERCUBE + `"'>
+        <span class="checkmark"></span>
+      </label>`
+                                        ),
+                                        new Tab(
+                                            `<h1>JavaSript Evaluation</h1>
+        <textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' style="height: 25vh;" onkeyup='window.algorithm.pipeline.programs[`+ i + `].uniforms[` + j + `].value=event.target.value' placeholder="Return uniform value with JavaScript, here...">` + escapeHTML(uniform.value) + `</textarea>`)
+                                    ])
+                            }), { listVariable: 'window.algorithm.pipeline.programs[' + i + '].uniforms', addFunction: 'addUniform(' + i + ', this, event)' }
+                        ),
+                        new Tab(
+                            `<h1>GLSL Vertex Shader</h1><textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + program_id + `_vertex_code"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.pipeline.programs[`+ i + `].vertex=event.target.value' 
+        placeholder="Program GLSL vertex shader code...">`+ escapeHTML(program.vertex) + `</textarea>`
+                        ),
+                        new Tab(
+                            `<h1>GLSL Fragment Shader</h1><textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + program_id + `_fragment_code"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.pipeline.programs[`+ i + `].fragment=event.target.value' 
+        placeholder="Program GLSL fragment shader code...">`
+                            + escapeHTML(program.fragment) + '</textarea>'
+                        )])
+            }), { listVariable: 'window.algorithm.pipeline.programs', addFunction: 'addProgram(this, event)' })
+
+            var stagesTab = new Tab("<h1 class='tab'>Stages</h1>", algorithm.pipeline.stages.map((stage, i) => {
+                const stage_id = `stage_` + i;
+                return new Tab(`
+      <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="`+ stage_id + `_name"
+        style="width: 100%; display:inline-block; text-align:center;"
+        placeholder="Stage name..."  onkeyup='window.algorithm.pipeline.stages[`+ i + `].name=event.target.value' value='`
+                    + escapeTitle(stage.name) + '\'></input>'
+                    , [
+                        new Tab(
+                            `<h1>Linked HTMLCanvas Context</h1><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + stage_id + `_context_name"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.pipeline.stages[`+ i + `].context=event.target.value' 
+        placeholder="Stage context..."  onkeyup='window.algorithm.pipeline.contexts[`+ i + `].context=event.target.value' value='`
+                            + escapeTitle(stage.context) + '\'></input>'
+                        ),
+                        new Tab(
+                            `<h1>Linked WebGL GLSL Program</h1><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + stage_id + `_program_name"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.pipeline.stages[`+ i + `].program=event.target.value' 
+        placeholder="Stage program..."  onkeyup='window.algorithm.pipeline.contexts[`+ i + `].program=event.target.value' value='`
+                            + escapeTitle(stage.program) + '\'></input>'
+                        ),
+                        new Tab(
+                            `<h1>WebGL DrawElements Type</h1>
+      <label class="checkboxes inline-checkboxes">Shader
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.SHADER ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.SHADER + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Point Mesh
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_POINTS ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_POINTS + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Lines Mesh
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_LINES ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_LINES + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Line Strip
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_LINE_STRIP ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_LINE_STRIP + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Line Loop
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_LINE_LOOP ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_LINE_LOOP + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Triangle Mesh
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_TRIANGLES ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_TRIANGLES + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Triangle Fan Mesh
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_TRIANGLE_FAN ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_TRIANGLE_FAN + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`+
+                            `<label class="checkboxes inline-checkboxes">Triangle Strip Mesh
+        <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="radio" name="`+ stage_id + `_type" ` + (stage.type === Format.OpenGLStage.Type.MESH_TRIANGLE_STRIP ? "checked=\"true\"" : "") + `
+        onchange='window.algorithm.pipeline.stages[`+ i + `].type="` + Format.OpenGLStage.Type.MESH_TRIANGLE_STRIP + `"; redrawTabs();'>
+        <span class="checkmark"></span>
+      </label>`
+                        ),
+                        ...(stage.type !== Format.OpenGLStage.Type.SHADER ? [new Tab(
+                            `<h1>Index Atrtribute JS Evaluation</h1><textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + stage_id + `_indices"
+        style=" height: 25vh; display:inline-block;"
+        onkeyup='window.algorithm.pipeline.stages[`+ i + `].indices=event.target.value' 
+        placeholder="Return an array indices of the sequence of attribute(s) to raster...">`
+                            + escapeHTML(stage.indices) + `</textarea>`
+                        ),
+                        new Tab(
+                            `<h1>Vertex Attribute(s) JS Evaluation</h1><textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="` + stage_id + `_vertices"
+        style=" height: 25vh; display:inline-block;"
+        onkeyup='window.algorithm.pipeline.stages[`+ i + `].vertices=event.target.value' 
+        placeholder="Return a nested array for the [[vertex] (, [color] (, [shape])) attribute(s)..." >`
+                            + escapeHTML(stage.vertices) + '</textarea>'
+                        )] : [])]
+                )
+            }), { listVariable: 'window.algorithm.pipeline.stages', addFunction: 'addStage(this, event)' })
+
+            var output = "<textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' disabled id='console'></textarea>"
+            var input = "<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' style='display:inline-block; width: 80%;' id='command'></input>"
+            var enter = "<button style='display:inline-block; width: 15%;' onclick='executeCommand()'>Run</button>"
+
+            const filesTab = new Tab("<h1 class='tab'>Files</h1><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type='file' id='file_input' style='display:none;' />",
+                algorithm.files.map((file, index) => {
+                    return new Tab(`<input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="algorithm_name"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.files[`+ index + `].name=event.target.value' 
+        placeholder="File name..." value='`
+                        + escapeTitle(file.name) + '\'></input>', [])
+                }), { listVariable: 'window.algorithm.files', addFunction: 'addFile(this, event)' })
+
+            return new Tab(
+                `<h1>Algorithm Title</h1><input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="algorithm_name"
+        style=" display:inline-block;"
+        onkeyup='window.algorithm.name=event.target.value' 
+        placeholder="Algorithm name..." value='`
+                + escapeTitle(algorithm.name) + '\'></input><br>' +
+                '<h1 style="display:inline  ;">Created:</h1><h1 style="display:inline; color:white">' + algorithm.created + '</h1><br>' +
+                '<h1 style="display:inline-block;">Views:</h1><h1 style="display:inline-block; color:white">' + algorithm.views + '</h1><br>',
+                [new Tab(
+                    `<h1>Description: </h1><textarea autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' id="algorithm_name"
+        style=" height: 25vh; display:inline-block;"
+        onkeyup='window.algorithm.description=event.target.value' 
+        placeholder="Algorithm description...">`+ escapeHTML(algorithm.description) + `</textarea>`
+                ),
+                //new Tab('<h1>Debug Console</h1>' + output + input + enter),
+                    htmlTab, javascriptTab, filesTab,
+                    contextsTab, programsTab, stagesTab
+                ])
+        }
+    </script>
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        const preview = document.createElement('div')
+        preview.classList.add('split')
+        preview.classList.add('split-a')
+
+
+        var iframe = "<iframe allow='microphone; camera' id='preview' src='/live/" + safe_path + "'></iframe>"
+        preview.innerHTML += iframe
+
+        var compile = `<button onclick="compile_algorithm(window.algorithm)">Compile</button>`
+        preview.innerHTML += compile
+        var share = `<button onclick="share_algorithm()">Share</button>`
+        preview.innerHTML += share
+        var upload = `<button onclick='document.getElementById("preview").contentWindow.postMessage({ share: true }, "*");show_waiting()''>Upload</button>`
+        preview.innerHTML += upload
+
+        const edit = document.createElement('div')
+        edit.classList.add('split')
+        edit.classList.add('split-b')
+        const tabs = document.createElement('div')
+        tabs.setAttribute('id', 'tabs')
+        edit.append(tabs)
+        renderTabTree(getAlgorithmTabs(algorithm), tabs)
+        const lists = tabs.getElementsByClassName('list-tab')
+        for (const list of lists) list.setAttribute('onclick', 'toggle(this, event)')
+
+        const split = document.createElement('div')
+        split.classList.add('split-container')
+        split.append(preview)
+        split.append(edit)
+        document.body.append(split);
+        document.body.innerHTML += '<script> window.algorithm=JSON.parse(atob(\"' + Buffer.from(JSON.stringify(algorithm), 'utf-8').toString('base64').split('').map((c, i) => { return c + ((i + 1) % 100 == 0 ? '\"+\n\"' : '') }).reduce((acc, s) => acc + s, "") + "\"));<\/script>"
+    </script>
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        document.body.innerHTML += `<div style='display:none;' id='popovers-div'></div>`
+        document.body.innerHTML += `<div id='navbar'>
+            <a href='/' style="float: left;">`+server_hostname+`</a>
+            <a href='/edit' style="float: right;">Create</a>
+        </div>`
+    </script>
+    <script>
+        window.counter = 0;
+        window.hidePopover = function () {
+            const popoversDiv = document.getElementById("popovers-div")
+            if(!popoversDiv) 
+                return window.setTimeout(hidePopover, 500);
+            popoversDiv.lastChild.remove()
+            if (popoversDiv.children.length == 0)
+                popoversDiv.style.display = 'none'
+        }
+        window.showPopover = function (contents, locking, completionButtons, completionCallbacks, unlockingCallback) {
+            const popoversDiv = document.getElementById("popovers-div")
+            contents = contents ? contents : '<h1>Hello!</h1><br><h1> and blah blah blah!</h1>'
+            completionButtons = completionButtons ? completionButtons : (locking ? '' : ['<h1>Ok</h1>'])
+            completionCallbacks = completionCallbacks ? completionCallbacks : ['window.hidePopover()']
+            unlockingCallback = unlockingCallback ? unlockingCallback : ''
+            const popoverBackground = document.createElement('div')
+            popoverBackground.setAttribute('onclick', unlockingCallback + ' event.stopPropagation();' + (!locking ? 'hidePopover()' : ''))
+
+            popoverBackground.classList.add('popover-background')
+            const popover = document.createElement('div')
+            popover.classList.add('popover')
+
+            completionButtons = completionButtons.map((b, index) => {
+                const button = document.createElement('button')
+                button.setAttribute('onclick', completionCallbacks[index])
+                button.innerHTML += b
+                return button
+            })
+
+            popover.setAttribute('onclick', 'event.stopPropagation()')
+
+            popover.innerHTML += contents + (completionButtons.length > 0 ? '<br>' : '')
+            completionButtons.forEach((b) => popover.append(b))
+            popoverBackground.append(popover)
+            popoversDiv.append(popoverBackground)
+            popoversDiv.setAttribute('style', 'display:fixed;')
+        }
+    </script>
+    <script>
+        window.onload = () => {
+            if(new URLSearchParams(window.location.search).get('upload') !== '1')
+                return;
+            new URLSearchParams(window.location.search).delete('upload')
+            let path = window.location.pathname
+            path = path.substring(0, path.length - 1)
+            path = path.substring(path.lastIndexOf('/') + 1, path.length) + '/'
+            showPopover('<h1 style="text-decoration:underline;">SUCCESS!</h1><br>' +
+                '<h1 style="display:inline-block;"> Editing Link:</h1>' +
+                '<a style="text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/edit/" + path) + '>' + (window.location.origin + "/edit/" + path) + '</a>' +
+                '<button style="display:inline-block;"onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/edit/" + path + '\')">Copy</button>' +
+                '<br><br><h1 style="display:inline-block;"> Viewing Link:</h1>' +
+                '<a style="text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/live/" + path) + '>' + (window.location.origin + "/live/" + path) + '</a>' +
+                '<button style="display:inline-block;" onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/live/" + path + '\')">Copy</button><br>', false, ['<h1 style="colr:#0f0;">Done</h1>'])
+        }
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

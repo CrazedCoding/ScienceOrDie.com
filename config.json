@@ -1,0 +1,7 @@
+{
+  "ssl": {
+    "cert": "",
+    "key": ""
+  },
+  "server_hostname": "Tangent.local"
+}

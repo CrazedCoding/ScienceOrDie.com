@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, 
+user-scalable=no">
+<html>
+
+<head>
+    <style type="text/css" src="www/css/main.css"></style>
+    <script class='self_rendering_code'  type="text/javascript">
+        window.counter = 0;
+
+        function escapeHTML(string) {
+            var pre = document.createElement('pre');
+            var text = document.createTextNode(string);
+            pre.appendChild(text);
+            return pre.innerHTML;
+        }
+        // List of HTML entities for escaping.
+        var htmlEscapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;',
+            '/': '&#x2F;'
+        };
+
+        // Regex containing the keys listed immediately above.
+        var htmlEscaper = /[&<>"'\/]/g;
+
+        // Escape a string for HTML interpolation.
+        function escapeTitle(string) {
+            return ('' + string).replace(htmlEscaper, function (match) {
+                return htmlEscapes[match];
+            });
+        };
+
+        function show_waiting() {
+            window.showPopover('<h1>Loading...</h1>', true, [])
+        }
+        function show_latest(answer) {
+            window.hidePopover();
+            show_waiting()
+
+            const query = window.location.query;
+            var url = "/warning/" + answer+(query? "?url="+query:"");
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", url);
+
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.onreadystatechange = function (event) {
+                if (xhr.readyState === 4) {
+                    hidePopover();
+                    if (xhr.status === 200) {
+                    }
+                    else {
+                        showPopover('<h1>Failed to accept!</h1>' + (xhr.responseText ? '<h1>' + escapeTitle(xhr.responseText) + '</h1>' : ""), false, ['<h1>Cancel</h1>', '<h1>Retry<h1>'], ['hidePopover()', 'hidePopover(); prompt_danger()'])
+                    }
+                }
+            }
+            xhr.onerror = function () {
+            };
+
+            xhr.send(JSON.stringify(window.lastSavedAlgorithm));
+            document.getElementById("show_latest").checked = true
+        }
+        function edit_algorithm() {
+            let path = document.getElementById('preview').src;
+            path = path.substring(0, path.length - 1)
+            path = path.substring(path.lastIndexOf('/') + 1, path.length) + '/'
+            window.location = window.location.origin+'/edit/'+path;
+        }
+        function share_algorithm() {
+            let path = document.getElementById('preview').src;
+            path = path.substring(0, path.length - 1)
+            path = path.substring(path.lastIndexOf('/') + 1, path.length) + '/'
+            showPopover('<h1 style="text-decoration:underline;">SUCCESS!</h1><br>' +
+                '<h1 style="display:inline-block;">' + 'Editing Link:</h1>' +
+                '<a style="text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/edit/" + path) + '>' + (window.location.origin + "/edit/" + path) + '</a>' +
+                '<button style="display:inline-block;"onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/edit/" + path + '\')">Copy</button>' +
+                '<br><br><h1 style="display:inline-block;">' + 'Viewing Link:</h1>' +
+                '<a style="text-decoration:underline;display:inline-block;" href=' + (window.location.origin + "/live/" + path) + '>' + (window.location.origin + "/live/" + path) + '</a>' +
+                '<button style="display:inline-block;" onclick="navigator.clipboard.writeText(\'' + window.location.origin + "/live/" + path + '\')">Copy</button><br>', false, ['<h1>Done</h1>'])
+        }
+    </script>
+    <script class='self_rendering_code'>
+        window.hidePopover = function () {
+            const popoversDiv = document.getElementById("popovers-div")
+            if(!popoversDiv) 
+                return window.setTimeout(hidePopover, 500);
+            popoversDiv.lastChild.remove()
+            if (popoversDiv.children.length == 0)
+                popoversDiv.style.display = 'none'
+        }
+        window.showPopover = function (contents, locking, completionButtons, completionCallbacks, unlockingCallback) {
+            const popoversDiv = document.getElementById("popovers-div")
+            contents = contents ? contents : '<h1>Hello!</h1><br><h1> and blah blah blah!</h1>'
+            completionButtons = completionButtons ? completionButtons : (locking? '' : ['<h1>Ok</h1>'])
+            completionCallbacks = completionCallbacks ? completionCallbacks : ['window.hidePopover()']
+            unlockingCallback = unlockingCallback ? unlockingCallback : ''
+            const popoverBackground = document.createElement('div')
+            popoverBackground.setAttribute('onclick', unlockingCallback + ' event.stopPropagation();' + (!locking ? 'hidePopover()' : ''))
+
+            popoverBackground.classList.add('popover-background')
+            const popover = document.createElement('div')
+            popover.classList.add('popover')
+
+            completionButtons = completionButtons.map((b, index) => {
+                const button = document.createElement('button')
+                button.setAttribute('onclick', completionCallbacks[index])
+                button.innerHTML += b
+                return button
+            })
+
+            popover.setAttribute('onclick', 'event.stopPropagation()')
+
+            popover.innerHTML += contents+(completionButtons.length>0?'<br>':'')
+            completionButtons.forEach((b) => popover.append(b))
+            popoverBackground.append(popover)
+            popoversDiv.append(popoverBackground)
+            popoversDiv.setAttribute('style', 'display:fixed;')
+        }
+    </script>
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+
+        const browse = document.createElement('div')
+
+        var page = 1;
+        var sort = 'date'
+        var category = 'featured'
+        try {
+            if(url) {
+                var first = url.indexOf('/')
+                if(first >= 0) {
+                    url = url.substring(first+1)
+                    var second = url.indexOf('/')
+                    if(second >= 0) {
+                        category = url.substring(0, second)
+                        url = url.substring(second+1)
+                        var third = url.indexOf('/')
+                        if(third >= 0) {
+                            sort = url.substring(0, third)
+                            url = url.substring(third+1)
+                            page = parseInt(url)
+                        }
+                    }
+                }
+            } 
+        } catch(e) {
+            page = 1;
+            sort = 'date'
+            category = 'featured'
+        }
+
+        var max_per_page = 8;
+        var max_page = Math.ceil(algorithm_list.length/max_per_page);
+
+        var cards = "<br>"
+        
+        cards += (category !== 'featured' ? `<a class='navigation' href="/featured/`+sort+`/1">Featured</a>`:
+                    `<a class='navigation' href="/latest/`+sort+`/1">Latest</a>`)
+        cards += (sort !== 'views' ? `<a class='navigation' href="/`+category+`/views/1">Sort by Views</a>`:
+            `<a class='navigation' href="/`+category+`/date/1">Sort by Date</a>`)
+
+        if(sort == 'views')
+            algorithm_list.sort((a, b) => b.algorithm.views-a.algorithm.views )
+        else
+            algorithm_list.sort((a, b) => new Date(b.algorithm.created).getTime()-new Date(a.algorithm.created).getTime() )
+
+
+        var left_pages = [];
+        var right_pages = [];
+        var middle_page = ''
+        for(var i = 1; i <= max_page; i++)
+        {
+            if(i<page){
+                left_pages.push("<a href='"+`/`+category+`/`+sort+`/`+i+"' style='"+"' class='navigation'>"+i+"</a>");
+            }
+            else if(i==page){
+                middle_page = "<a href='"+`/`+category+`/`+sort+`/`+i+"' style='"+("color:#0F0; border-color:#0F0;")+"' class='navigation'>"+i+"</a>";
+            }
+            else {
+                right_pages.push("<a href='"+`/`+category+`/`+sort+`/`+i+"' style='"+"' class='navigation'>"+i+"</a>");
+            }
+        }
+
+        var pages = ''
+
+        for(var i = 0; i < Math.min(1, left_pages.length); i++)
+            pages += left_pages.shift()
+
+        if(left_pages.length > 1)
+            pages += '<h1 style="display:inline;">...</h1>'
+
+        if(left_pages.length > 0)
+            pages += left_pages.pop()
+
+        pages += middle_page
+
+        if(right_pages.length >0)
+            pages += right_pages.shift()
+
+        if(right_pages.length > 1)
+            pages += '<h1 style="display:inline;">...</h1>'
+        
+        var min = Math.min(1, right_pages.length);
+        for(var i = 0; i < min; i++)
+            pages += right_pages[right_pages.length-min+i]
+        
+        if(page > 1)
+            pages = '<a href="/'+category+'/'+sort+'/'+(page-1)+'" class="navigation"><-</a>' + pages 
+        if(page < max_page)
+            pages = pages + '<a href="/'+category+'/'+sort+'/'+(page+1)+'" class="navigation">-></a>';
+
+        cards += '<br><br>'+pages+'<br>';
+
+        algorithm_list = algorithm_list.filter((a, i) => Math.floor(i/max_per_page+1) == page)
+
+        const preview = document.createElement('div')
+        preview.classList.add('split')
+        preview.classList.add('split-a')
+
+        // document.body.innerHTML += '<script> window.algorithm=' + JSON.stringify(algorithm) + "; compile_algorithm(window.algorithm)<\/script>"
+
+        const index = Math.floor(Math.random()*(algorithm_list.length-1))
+
+        var iframe = "<iframe onload='window.hidePopover();' allow='microphone; camera' src='/live/"+algorithm_list[index].path+"/' id='preview'></iframe>"
+        preview.innerHTML += iframe
+
+        var edit = `<a class='navigation' id='edit_link' href="/edit/`+algorithm_list[index].path+`">Edit</a>`
+        preview.innerHTML += edit
+        var share = `<a class='navigation' id='share_link' href="/live/`+algorithm_list[index].path+`/">Share</a>`
+        preview.innerHTML += share
+
+        for(const entry of algorithm_list){
+            const algorithm = entry.algorithm;
+            const path = entry.path
+            cards += '<div class="card">'+
+                '<h1 style="color:#afa; text-decoration:underline;">'+escapeHTML(algorithm.name)+'</h1><br>'+
+                '<h1 style="color:#afa;">'+escapeHTML(algorithm.created.substring(0, 15))+
+                '<br>'+escapeHTML(algorithm.created.substring(16, 28))+'</h1><br>'+
+                '<img onclick="'+
+                `show_waiting(); 
+                window.last_selected=\'`+path+`\'; 
+                document.getElementById(\'preview\').src=window.location.origin+\'/live/\'+window.last_selected+'/'
+                document.getElementById(\'share_link\').setAttribute('href',window.location.origin+\'/live/\'+window.last_selected+'/')
+                document.getElementById(\'edit_link\').setAttribute('href',window.location.origin+\'/edit/\'+window.last_selected+'/' )"`+
+                'width=394 height=394 src="'+escapeHTML(algorithm.thumbnail)+'"/><br>'+
+                '<h1 style="color:#afa;">'+escapeHTML(algorithm.views)+' Views</h1><br>'+
+                '<a class="navigation" href="/edit/'+path+'/">Edit</a>'+
+                '<a class="navigation" href="/live/'+path+'/">Share</a><br><br>'+
+                '</div>'
+        }
+        cards += '<br><br>'+pages+'<br><br>';
+        const cardsDiv = document.createElement('div')
+        cardsDiv.classList.add('cards')
+        cardsDiv.innerHTML = cards
+        browse.append(cardsDiv);
+        browse.style.textAlign = 'center'
+
+        browse.classList.add('split')
+        browse.classList.add('split-b')
+        const split = document.createElement('div')
+        split.append(preview)
+        split.append(browse)
+        document.body.append(split);
+        document.body.innerHTML += `<div style='display:none;' id='popovers-div'></div>`
+        show_waiting()
+    </script>
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        document.body.innerHTML += `<div id='navbar'>
+            <a href='/' style="float: left;">`+server_hostname+`</a>
+            <a href='/edit' style="float: right;">Create</a>
+        </div>`
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>

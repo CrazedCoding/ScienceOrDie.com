@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, 
+user-scalable=no">
+<html>
+
+<head>
+    <style type="text/css">
+        html, body {
+            position: absolute !important;
+            width: 100% !important;
+            height: 100% !important;
+            margin-left: 0px!important;
+            margin-top: 0px!important;
+            left: 0px !important;
+            top: 0px !important;
+        }
+    </style>
+    
+    <script class='self_rendering_code' self_deleting='true' type="text/javascript">
+        if(algorithm.html) document.body.innerHTML += algorithm.html
+        document.body.innerHTML += '<script> window.algorithm=JSON.parse(atob(\"' + Buffer.from(JSON.stringify(algorithm), 'utf-8').toString('base64').split('').map((c, i)=>{return c+((i+1)%100==0?'\"+\n\"':'')}).reduce((acc, s)=>acc+s, "") + "\"));<\/script>"
+        document.body.innerHTML += '<script> window.onload=()=>{window.userAlgorithm = window.algorithm; reload_algorithm()}<\/script>'
+    </script>
+    <script type="text/javascript" src="www/js/html2canvas.min.js"></script>
+    <script type="text/javascript" src="www/js/format.js"></script>
+    <script type="text/javascript" src="www/js/pipeline.js"></script>
+    <script>
+        const oldLogFunction = console.log
+        const oldWarnFunction = console.warn
+        const oldDebugFunction = console.debug
+        const oldErrorFunction = console.error
+        console.log = function(...args) {
+            window.parent.postMessage(JSON.stringify({ log: true, args}), origin)
+            oldLogFunction(...args)
+        }
+        console.warn = function(...args) {
+            window.parent.postMessage(JSON.stringify({ warn: true, args}), origin)
+            oldWarnFunction(...args)
+        }
+        console.debug = function(...args) {
+            window.parent.postMessage(JSON.stringify({ debug: true, args}), origin)
+            oldDebugFunction(...args)
+        }
+        console.error = function(...args) {
+            window.parent.postMessage(JSON.stringify({ error: true, args}), origin)
+            oldErrorFunction(...args)
+        }
+    </script>
+</head>
+
+<body>
+</body>
+</html>
