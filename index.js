@@ -93,7 +93,7 @@ function streamBufferChunked(buffer, req, res) {
   res.setHeader('Accept-Ranges', 'bytes')
   res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
   res.setHeader('Content-Length', range.end - range.start + 1)
-  res.write(buffer.subarray(range.start, range.end + 1)).end();
+  res.end(buffer.subarray(range.start, range.end + 1));
 }
 
 function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
