@@ -78,7 +78,7 @@ function streamBufferChunked(buffer, req, res) {
   res.setHeader('Pragma', 'no-cache')
   res.setHeader('Expires', 0)
   res.setHeader('Accept-Ranges', 'bytes')
-  res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
+  res.setHeader('Content-Type', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
   res.setHeader('Content-Length', range.end - range.start + 1)
   res.end(buffer.subarray(range.start, range.end + 1));
 }
@@ -87,6 +87,10 @@ function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
 
 const router = express.Router();
 
+router.all('*', (req, res, next) => {
+  res.setHeader('Content-Type', 'text/html')
+  res.next()
+})
 router.all('/edit/:algorithm/', (req, res, next) => {
   try {
     if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
