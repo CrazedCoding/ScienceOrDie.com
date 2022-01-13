@@ -123,21 +123,28 @@ user-scalable=no">
         }
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
-        const OG = `<meta name="description" content="`+server_hostname+`">
-        <!-- Facebook Meta Tags -->
-        <meta property="og:url" content="`+url+`">
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="`+'Browse'+`">
-        <meta property="og:description" content="`+'Are you science?!'+`">
-        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">
+        const OG = `
+        <meta name="twitter:card" content="summary" />
+<meta property="og:url" content="`+url+`" />
+<meta property="og:title" content="Browse" />
+<meta property="og:description" content="Are you science?!" />
+<meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`" />`
 
-        <!-- Twitter Meta Tags -->
-        <meta name="twitter:card" content="`+server_hostname+`">
-        <meta name="twitter:domain" content="`+host+`">
-        <meta name="twitter:url" content="`+url+`">
-        <meta name="twitter:title" content="`+'Browse'+`">
-        <meta name="twitter:description" content="`+'Are you science?!'+`">
-        <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">`
+        // <meta name="description" content="`+server_hostname+`">
+        // <!-- Facebook Meta Tags -->
+        // <meta property="og:url" content="`+url+`">
+        // <meta property="og:type" content="website">
+        // <meta property="og:title" content="`+'Browse'+`">
+        // <meta property="og:description" content="`+'Are you science?!'+`">
+        // <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">
+
+        // <!-- Twitter Meta Tags -->
+        // <meta name="twitter:card" content="`+server_hostname+`">
+        // <meta name="twitter:domain" content="`+host+`">
+        // <meta name="twitter:url" content="`+url+`">
+        // <meta name="twitter:title" content="`+'Browse'+`">
+        // <meta name="twitter:description" content="`+'Are you science?!'+`">
+        // <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`">`
         document.head.innerHTML += OG
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">

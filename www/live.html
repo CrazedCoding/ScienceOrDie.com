@@ -51,20 +51,26 @@ user-scalable=no">
         var safe_name = algorithm.name.toLowerCase().replace(/[\W_]+/g, "_");//Make name lower-case and replace non-alphanumeric with underscores
         safe_name = safe_name.substring(0, Math.min(32, safe_name.length))
         
-        const OG = `<meta name="description" content="`+server_hostname+`">
-        <!-- Facebook Meta Tags -->
-        <meta property="og:url" content="`+url+`">
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
-        <meta property="og:description" content="`+escapeHTML(algorithm.description)+`">
-        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">
-        <!-- Twitter Meta Tags -->
-        <meta name="twitter:card" content="`+server_hostname+`">
-        <meta property="twitter:domain" content="`+host+`">
-        <meta property="twitter:url" content="`+url+`">
-        <meta name="twitter:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
-        <meta name="twitter:description" content="`+escapeHTML(algorithm.description)+`">
-        <meta property="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">`
+        const OG = `
+        <meta name="twitter:card" content="summary" />
+<meta property="og:url" content="`+url+`" />
+<meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`" />
+<meta property="og:description" content="`+escapeHTML(algorithm.description)+`" />
+<meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`" />`
+        // <meta name="description" content="`+server_hostname+`">
+        // <!-- Facebook Meta Tags -->
+        // <meta property="og:url" content="`+url+`">
+        // <meta property="og:type" content="website">
+        // <meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
+        // <meta property="og:description" content="`+escapeHTML(algorithm.description)+`">
+        // <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">
+        // <!-- Twitter Meta Tags -->
+        // <meta name="twitter:card" content="`+server_hostname+`">
+        // <meta property="twitter:domain" content="`+host+`">
+        // <meta property="twitter:url" content="`+url+`">
+        // <meta name="twitter:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
+        // <meta name="twitter:description" content="`+escapeHTML(algorithm.description)+`">
+        // <meta property="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">`
 
         document.head.innerHTML += OG
     </script>

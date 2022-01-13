@@ -7,21 +7,27 @@ user-scalable=no">
     <style type="text/css" src="www/css/main.css"></style>
 
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
-        const OG = `<meta name="description" content="`+server_hostname+`">
-        <!-- Facebook Meta Tags -->
-        <meta property="og:url" content="`+url+`">
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="`+'CAPTCHA'+`">
-        <meta property="og:description" content="`+'Are you human?'+`">
-        <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">
+        const OG = `
+        <meta name="twitter:card" content="summary" />
+<meta property="og:url" content="`+url+`" />
+<meta property="og:title" content="`+'CAPTCHA'+`" />
+<meta property="og:description" content="`+'Are you human?'+`" />
+<meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/mosaic.jpg"+`" />`
+        // <meta name="description" content="`+server_hostname+`">
+        // <!-- Facebook Meta Tags -->
+        // <meta property="og:url" content="`+url+`">
+        // <meta property="og:type" content="website">
+        // <meta property="og:title" content="`+'CAPTCHA'+`">
+        // <meta property="og:description" content="`+'Are you human?'+`">
+        // <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">
 
-        <!-- Twitter Meta Tags -->
-        <meta name="twitter:card" content="`+server_hostname+`">
-        <meta property="twitter:domain" content="`+host+`">
-        <meta property="twitter:url" content="`+url+`">
-        <meta name="twitter:title" content="`+'CAPTCHA'+`">
-        <meta name="twitter:description" content="`+'Are you human?'+`">
-        <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">`
+        // <!-- Twitter Meta Tags -->
+        // <meta name="twitter:card" content="`+server_hostname+`">
+        // <meta property="twitter:domain" content="`+host+`">
+        // <meta property="twitter:url" content="`+url+`">
+        // <meta name="twitter:title" content="`+'CAPTCHA'+`">
+        // <meta name="twitter:description" content="`+'Are you human?'+`">
+        // <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/img/splash.png"+`">`
         console.log("OG", OG);
         document.body.innerHTML += OG
     </script>
