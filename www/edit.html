@@ -261,7 +261,7 @@ user-scalable=no">
         <meta name="twitter:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`">
         <meta name="twitter:description" content="`+escapeHTML(algorithm.description)+`">
         <meta name="twitter:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`">`
-        document.body.innerHTML += OG
+        document.head.innerHTML += OG
     </script>
     <script type="text/javascript" src="/js/format.js"></script>
     <!--One for the client-->
