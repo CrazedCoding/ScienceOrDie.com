@@ -89,7 +89,7 @@ const router = express.Router();
 
 router.all('*', (req, res, next) => {
   res.setHeader('Content-Type', 'text/html')
-  res.next()
+  next()
 })
 router.all('/edit/:algorithm/', (req, res, next) => {
   try {
