@@ -155,7 +155,6 @@ router.get('/live/:algorithm/', (req, res, next) => {
     else {
       algorithm.views += 1;
       fs.writeFileSync(relative_path, JSON.stringify(algorithm, null, 2))
-      algorithm.files = algorithm.files.map((file)=>{file.data='Not delivered to live algorithm requests via JSON. Please use the edit feature.'; return file;})
       // algorithm.files = algorithm.files.map((file)=>{file.data = ''; return file})
       res.write(render({path:'./www/live.html', algorithm, url:req.getUrl(), safe_path, opts}))
       res.end()
