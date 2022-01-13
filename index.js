@@ -349,7 +349,7 @@ router.post('/share/:hash', (req, res, next) => {
 
       let safe_name = req.body.name.toLowerCase().replace(/[\W_]+/g, "_");//Make name lower-case and replace non-alphanumeric with underscores
       safe_name = safe_name.substring(0, Math.min(32, safe_name.length))
-      let folder_name = 'www/share/' + safe_nametemp_name;
+      let folder_name = 'www/share/' + safe_name;
 
       if (fs.existsSync(folder_name)) {
         res.status(404).send("Upload already exists.")
@@ -360,7 +360,7 @@ router.post('/share/:hash', (req, res, next) => {
 
       fs.writeFileSync(folder_name + '/' + safe_name + '.json', readable);
 
-      const remote_path = temp_name + '/'
+      const remote_path = safe_name + '/'
       res.send(JSON.stringify({ saved_as: remote_path }))
       res.end()
     }
