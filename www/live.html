@@ -18,7 +18,10 @@ user-scalable=no">
     
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
         if(algorithm.html) document.body.innerHTML += algorithm.html
-        document.body.innerHTML += '<script> window.algorithm=JSON.parse(atob(\"' + Buffer.from(JSON.stringify(algorithm), 'utf-8').toString('base64').split('').map((c, i)=>{return c+((i+1)%100==0?'\"+\n\"':'')}).reduce((acc, s)=>acc+s, "") + "\"));<\/script>"
+        var encoded_algorithm = JSON.parse(JSON.stringify(algorithm)) 
+        encoded_algorithm.files = encoded_algorithm.files.map((file)=>{file.data='Not delivered to live algorithm requests via JSON. Please use the edit feature.'; return file;})
+        encoded_algorithm.thumbnail = undefined
+        document.body.innerHTML += '<script> window.algorithm=JSON.parse(atob(\"' + Buffer.from(JSON.stringify(encoded_algorithm), 'utf-8').toString('base64').split('').map((c, i)=>{return c+((i+1)%100==0?'\"+\n\"':'')}).reduce((acc, s)=>acc+s, "") + "\"));<\/script>"
         document.body.innerHTML += '<script> window.onload=()=>{window.userAlgorithm = window.algorithm; reload_algorithm()}<\/script>'
     </script>
     <script class='self_rendering_code' self_deleting='true' type="text/javascript">
