@@ -143,15 +143,6 @@ OpenGLPipeline.prototype.setProto = function (new_proto) {
     while (this.contexts.length < new_contexts.length)
       this.contexts.push(new OpenGLContext());
 
-    for (var i = 0; i < this.contexts.length; i++) {
-      if (this.contexts[i].gl && this.contexts[i].cached_programs) {
-        this.contexts[i].gl.useProgram(null);
-        for (var name in this.contexts[i].cached_programs) {
-          this.contexts[i].gl.deleteProgram(this.contexts[i].cached_programs[name]);
-        }
-        this.contexts[i].cached_programs = {};
-      }
-    }
 
     for (var i = 0; i < new_contexts.length; i++)
       this.contexts[i].setProto(new_contexts[i]);
