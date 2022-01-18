@@ -419,7 +419,7 @@ user-scalable=no">
                             `<h1>Other</h1>
       <label class="checkboxes">WebGL Depth Buffer Enabled
         <input autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' type="checkbox" name="`+ context_id + `_depth_test"
-        onchange='window.algorithm.pipeline.contexts[`+ i + `].depth_test=event.target.checked'>
+        onchange='window.algorithm.pipeline.contexts[`+ i + `].depth_test=event.target.checked' checked='`+algorithm.pipeline.contexts[i].depth_test+`'>
         <span class="checkmark"></span>
       </label>`
                         )])

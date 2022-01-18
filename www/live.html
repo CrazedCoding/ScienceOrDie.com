@@ -58,7 +58,7 @@ user-scalable=no">
         <!-- Facebook Meta Tags -->
         <meta property="og:url" content="`+url+`"/>
         <meta property="og:type" content="website"/>
-        <meta property="og:title" content="`+'Edit - '+escapeTitle(algorithm.name)+`"/>
+        <meta property="og:title" content="`+escapeTitle(algorithm.name)+`"/>
         <meta property="og:description" content="`+escapeHTML(algorithm.description)+`"/>
         <meta property="og:image" content="`+'http'+(url.startsWith('https') ? 's' : '')+'://'+host+"/thumbnail/"+safe_name+`"/>
         <!-- Twitter Meta Tags -->
