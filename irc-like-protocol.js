@@ -89,7 +89,7 @@ exports.create = function () {
 
 	User.prototype.say = function (message) {
 		if(!this.channel) {
-			this.send(JSON.stringify({ error: 'Cannot say anything while not in a channel. Please enter "/help join" for more details...' }));
+			this.client.send(JSON.stringify({ error: 'Cannot say anything while not in a channel. Please enter "/help join" for more details...' }));
 		} else {
 			const our_name = this.name;
 			const our_ip = this.client.remoteAddress;
