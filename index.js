@@ -20,7 +20,7 @@ if (!opts["ssl"]) {
   console.warn("No ssl set. Please run `node configure.js`!")
 }
 
-opts.maxUpload = "5mb"
+opts.maxUpload = "10mb"
 opts.cookieLifeTime = 60 * 30 // Seconds
 
 // List of HTML entities for escaping.
