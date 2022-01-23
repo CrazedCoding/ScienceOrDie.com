@@ -131,17 +131,21 @@ user-scalable=no">
 
             // If you encode the message in JSON before sending them,
             // then decode here
-            const decoded = JSON.parse(data);
-            // console.log(decoded)
 
-            if (decoded.save) {
-                window.lastSavedAlgorithm = decoded.algorithm;
-                window.hidePopover()
-                show_save_warning()
-            } else if (decoded.log || decoded.debug || decoded.warn || decoded.error) {
-                //consoleAppend(decoded.args)
+            try {
+                const decoded = JSON.parse(data);
+                // console.log(decoded)
+
+                if (decoded.save) {
+                    window.lastSavedAlgorithm = decoded.algorithm;
+                    window.hidePopover()
+                    show_save_warning()
+                } else if (decoded.log || decoded.debug || decoded.warn || decoded.error) {
+                    //consoleAppend(decoded.args)
+                }
+            }catch(e) {
+                console.log(e)
             }
-
 
         });
         function compile_algorithm(algorithm) {
