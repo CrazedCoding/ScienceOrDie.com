@@ -90,7 +90,12 @@ const router = express.Router();
 
 router.all('*', (req, res, next) => {
   try {
-    res.setHeader('Content-Type', mime.lookup(req.url));
+    if(req.url.indexOf(".") >= 0){
+      res.setHeader('Content-Type', 'text/html')
+    }
+    else {
+      res.setHeader('Content-Type', mime.lookup(req.url));
+    }
   } catch(e) {
     console.log(e);
   }
