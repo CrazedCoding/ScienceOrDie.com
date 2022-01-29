@@ -92,9 +92,9 @@ router.all('*', (req, res, next) => {
   if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
   try {
     if(req.path.indexOf(".") > -1){
-      res.setHeader('Content-Type', 'text/html')
-    } else {
       res.setHeader('Content-Type', mime.lookup(req.path));
+    } else {
+      res.setHeader('Content-Type', 'text/html')
     }
   } catch(e) {
     console.log(e);
