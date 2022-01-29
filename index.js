@@ -1,5 +1,6 @@
 const opts = require('./config.json')
 const fs = require('fs');
+const mime = require('mime')
 const express = require('express');
 const session = require('express-session')
 const application = express()
@@ -193,7 +194,7 @@ router.get('/live/:algorithm/:resource', (req, res, next) => {
       const resource = algorithm.files.filter((file) => {
         return file.name === resource_name
       })[0]
-      res.type(resource.name)
+      res.setHeader('Content-Type', mime.getType(resource.name));
       streamBufferChunked(Buffer.from(resource.data, 'base64'), req, res)
     }
   } catch (e) {
