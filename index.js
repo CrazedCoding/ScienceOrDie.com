@@ -89,7 +89,11 @@ function clone(obj) { return JSON.parse(JSON.stringify(obj)) }
 const router = express.Router();
 
 router.all('*', (req, res, next) => {
-  res.setHeader('Content-Type', 'text/html')
+  try {
+    res.setHeader('Content-Type', mime.getType(req.url));
+  } catch(e) {
+    console.log(e);
+  }
   next()
 })
 router.all('/edit/:algorithm/', (req, res, next) => {
@@ -194,7 +198,6 @@ router.get('/live/:algorithm/:resource', (req, res, next) => {
       const resource = algorithm.files.filter((file) => {
         return file.name === resource_name
       })[0]
-      res.setHeader('Content-Type', mime.getType(resource.name));
       streamBufferChunked(Buffer.from(resource.data, 'base64'), req, res)
     }
   } catch (e) {
