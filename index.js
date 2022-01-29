@@ -91,11 +91,10 @@ const router = express.Router();
 router.all('*', (req, res, next) => {
   if (opts.debug) console.log(req.socket.remoteAddress, new Date(), req.url);
   try {
-    if(req.url.indexOf(".") >= 0){
+    if(req.path.indexOf(".") > -1){
       res.setHeader('Content-Type', 'text/html')
-    }
-    else {
-      res.setHeader('Content-Type', mime.lookup(req.url));
+    } else {
+      res.setHeader('Content-Type', mime.lookup(req.path));
     }
   } catch(e) {
     console.log(e);
