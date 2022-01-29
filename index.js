@@ -79,7 +79,7 @@ function streamBufferChunked(buffer, req, res) {
   res.setHeader('Pragma', 'no-cache')
   res.setHeader('Expires', 0)
   res.setHeader('Accept-Ranges', 'bytes')
-  res.setHeader('Content-Type', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
+  res.setHeader('Content-Range', 'bytes ' + range.start + '-' + range.end + '/' + buffer.length)
   res.setHeader('Content-Length', range.end - range.start + 1)
   res.end(buffer.subarray(range.start, range.end + 1));
 }
