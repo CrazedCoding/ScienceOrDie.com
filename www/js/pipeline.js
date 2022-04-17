@@ -117,7 +117,7 @@ OpenGLPipeline.prototype.getContext = function (name) {
   return null;
 }
 
-OpenGLPipeline.prototype.render = function (lastContext) {
+OpenGLPipeline.prototype.render = function () {
   for (var i = 0; i < this.stages.length; i++)
     this.getContext(this.stages[i].stage.context).render(this.getProgram(this.stages[i].stage.program), this.stages[i]);
 }
@@ -340,9 +340,6 @@ OpenGLContext.prototype.destroy = function () {
   this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, null);
   this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null);
 
-  this.gl.deleteShader(this.fragment_shader);
-  this.gl.deleteShader(this.vertex_shader);
-  this.gl.deleteProgram(this.shader_program);
   this.textures = [];
   this.gl.deleteBuffer(this.vertex_buffer);
   this.gl.deleteBuffer(this.index_buffer);
@@ -487,13 +484,13 @@ OpenGLContext.prototype.render = function (program, stage) {
   if (!this.cached_programs)
     this.cached_programs = {};
 
-  if (!this.cached_programs[program.program.name]) {
-    this.cached_programs[program.program.name] = program.getProgram(this);
-    if (!this.cached_programs[program.program.name])
+  if (!this.cached_programs[program.program.name+'-'+this.context.name]) {
+    this.cached_programs[program.program.name+'-'+this.context.name] = program.getProgram(this);
+    if (!this.cached_programs[program.program.name+'-'+this.context.name])
       throw new Error();
   }
 
-  this.gl.useProgram(this.cached_programs[program.program.name]);
+  this.gl.useProgram(this.cached_programs[program.program.name+'-'+this.context.name]);
   stage.refreshGeometry(this, program);
   program.setUniforms(this, stage);
   this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
@@ -504,9 +501,6 @@ var OpenGLProgram = function (program_proto) { // "Constructor."
 
   this.program = program_proto ? program_proto : {};
   errorCode = { error: "", code: "" };
-  this.vertex_shader = null;
-  this.fragment_shader = null;
-  this.shader_program = null;
   this.setProto(program_proto ? program_proto : {});
 };
 
@@ -520,8 +514,9 @@ OpenGLProgram.prototype.setProto = function (program_proto) {
 }
 
 OpenGLProgram.prototype.setUniforms = function (context, stage) {
+  var shader = context.cached_programs[this.program.name+'-'+context.context.name];
   for (var i = 0; (this.program.uniforms) && (this.cached_uniform_evals) && (i < this.program.uniforms.length) && (i < this.cached_uniform_evals.length); i++) {
-    var location = context.gl.getUniformLocation(this.shader_program, this.program.uniforms[i].name);
+    var location = context.gl.getUniformLocation(shader, this.program.uniforms[i].name);
     var type = this.program.uniforms[i].type;
     var value = this.cached_uniform_evals[i].bind(this)(context, this, stage);
 
@@ -725,54 +720,48 @@ OpenGLProgram.prototype.getTemplateFragmentShader = function (context) {
   return shader;
 }
 OpenGLProgram.prototype.getProgram = function (context) {
-  var compiled = this.fragment_shader != null && this.vertex_shader != null;
-
-  //if (!compiled) 
-  {
-
-    errorCode = { report: "", code: "" };
-    this.fragment_shader = this.getTemplateFragmentShader(context);
-    if (!this.fragment_shader) {
-      console.error(errorCode.report, errorCode.code);
-      return;
-    }
-
-    this.vertex_shader = this.getTemplateVertexShader(context);
-
-    if (!this.vertex_shader) {
-      console.error(errorCode.report, errorCode.code);
-      return;
-    }
-
-    this.shader_program = context.gl.createProgram();
-    context.gl.attachShader(this.shader_program, this.fragment_shader);
-    context.gl.attachShader(this.shader_program, this.vertex_shader);
-    context.gl.linkProgram(this.shader_program);
-
-    if (!context.gl.getProgramParameter(this.shader_program, context.gl.LINK_STATUS)) {
-      errorCode.report += "\nUnable to link program!";
-      context.gl.deleteProgram(this.shader_program);
-      console.error(errorCode.report, errorCode.code);
-    }
+  errorCode = { report: "", code: "" };
+  var fragment_shader = this.getTemplateFragmentShader(context);
+  if (!fragment_shader) {
+    console.error(errorCode.report, errorCode.code);
+    return;
   }
 
-  context.gl.useProgram(this.shader_program);
+  var vertex_shader = this.getTemplateVertexShader(context);
+
+  if (!vertex_shader) {
+    console.error(errorCode.report, errorCode.code);
+    return;
+  }
+
+  var shader_program = context.gl.createProgram();
+  context.gl.attachShader(shader_program, fragment_shader);
+  context.gl.attachShader(shader_program, vertex_shader);
+  context.gl.linkProgram(shader_program);
+
+  if (!context.gl.getProgramParameter(shader_program, context.gl.LINK_STATUS)) {
+    errorCode.report += "\nUnable to link program!";
+    context.gl.deleteProgram(shader_program);
+    console.error(errorCode.report, errorCode.code);
+  }
+
+  context.gl.useProgram(shader_program);
 
 
-  this.shader_program.vertexAttribute = context.gl.getAttribLocation(this.shader_program, "vertex");
-  if (this.shader_program.vertexAttribute > -1)
-    context.gl.enableVertexAttribArray(this.shader_program.vertexAttribute);
+  shader_program.vertexAttribute = context.gl.getAttribLocation(shader_program, "vertex");
+  if (shader_program.vertexAttribute > -1)
+    context.gl.enableVertexAttribArray(shader_program.vertexAttribute);
 
-  this.shader_program.colorAttribute = context.gl.getAttribLocation(this.shader_program, "color");
-  if (this.shader_program.colorAttribute > -1)
-    context.gl.enableVertexAttribArray(this.shader_program.colorAttribute);
+  shader_program.colorAttribute = context.gl.getAttribLocation(shader_program, "color");
+  if (shader_program.colorAttribute > -1)
+    context.gl.enableVertexAttribArray(shader_program.colorAttribute);
 
-  this.shader_program.shapeAttribute = context.gl.getAttribLocation(this.shader_program, "shape");
-  if (this.shader_program.shapeAttribute > -1)
-    context.gl.enableVertexAttribArray(this.shader_program.shapeAttribute);
+  shader_program.shapeAttribute = context.gl.getAttribLocation(shader_program, "shape");
+  if (shader_program.shapeAttribute > -1)
+    context.gl.enableVertexAttribArray(shader_program.shapeAttribute);
 
 
-  return this.shader_program;
+  return shader_program;
 }
 
 var OpenGLStage = function (stage_proto) { // "Constructor."
@@ -878,24 +867,26 @@ OpenGLStage.prototype.refreshGeometry = function (context, program) {
     this.vertex_buffer.itemSize = 4;
     this.color_buffer.itemSize = 4;
     this.shape_buffer.itemSize = 4;
+   
+    var shader = context.cached_programs[program.program.name+'-'+context.context.name];
 
     if (this.vertices.length > 0) {
       context.gl.bindBuffer(context.gl.ARRAY_BUFFER, this.vertex_buffer);
       context.gl.bufferData(context.gl.ARRAY_BUFFER, new Float32Array(this.vertices[0]), context.gl.DYNAMIC_DRAW);
-      context.gl.enableVertexAttribArray(program.shader_program.vertexAttribute);
-      context.gl.vertexAttribPointer(program.shader_program.vertexAttribute, this.vertex_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
+      context.gl.enableVertexAttribArray(shader.vertexAttribute);
+      context.gl.vertexAttribPointer(shader.vertexAttribute, this.vertex_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
     }
     if (this.vertices.length > 1) {
       context.gl.bindBuffer(context.gl.ARRAY_BUFFER, this.color_buffer);
       context.gl.bufferData(context.gl.ARRAY_BUFFER, new Float32Array(this.vertices[1]), context.gl.DYNAMIC_DRAW);
-      context.gl.enableVertexAttribArray(program.shader_program.colorAttribute);
-      context.gl.vertexAttribPointer(program.shader_program.colorAttribute, this.color_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
+      context.gl.enableVertexAttribArray(shader.colorAttribute);
+      context.gl.vertexAttribPointer(shader.colorAttribute, this.color_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
     }
     if (this.vertices.length > 2) {
       context.gl.bindBuffer(context.gl.ARRAY_BUFFER, this.shape_buffer);
       context.gl.bufferData(context.gl.ARRAY_BUFFER, new Float32Array(this.vertices[2]), context.gl.DYNAMIC_DRAW);
-      context.gl.enableVertexAttribArray(program.shader_program.shapeAttribute);
-      context.gl.vertexAttribPointer(program.shader_program.shapeAttribute, this.shape_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
+      context.gl.enableVertexAttribArray(shader.shapeAttribute);
+      context.gl.vertexAttribPointer(shader.shapeAttribute, this.shape_buffer.itemSize, context.gl.FLOAT, false, 0, 0);
     }
 
     context.gl.bindBuffer(context.gl.ELEMENT_ARRAY_BUFFER, this.index_buffer);

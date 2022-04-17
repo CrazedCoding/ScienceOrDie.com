@@ -1,7 +1,7 @@
 {
   "ssl": {
-    "cert": "",
-    "key": ""
+    "cert": "/etc/letsencrypt/live/scienceordie.com/fullchain.pem",
+    "key": "/etc/letsencrypt/live/scienceordie.com/privkey.pem"
   },
-  "server_hostname": "Tangent.local"
+  "server_hostname": "ScienceOrDie.com"
 }
